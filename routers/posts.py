@@ -1,4 +1,3 @@
-from argparse import OPTIONAL
 from fastapi import status, HTTPException, Depends, APIRouter
 from sqlalchemy.orm import Session
 from typing import List, Optional

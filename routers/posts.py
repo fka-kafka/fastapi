@@ -37,7 +37,7 @@ def create_post(post: schemas.PostCreate, db: Session = Depends(get_db), current
 
 ### Get all posts ###
 @router.get('/', response_model=List[schemas.PostResponse])
-def get_posts(db: Session = Depends(get_db), limit: int = 10, skip: int = 2, search: Optional[str] = ""):
+def get_posts(db: Session = Depends(get_db), limit: int = 10, skip: int = 0, search: Optional[str] = ""):
     # cursor.execute("""
     #                SELECT * FROM posts where id > 90
     #                """)

@@ -66,9 +66,7 @@ def get_post(id: int, db: Session = Depends(get_db)):
     reqested_post = query.first()
 
     if not reqested_post:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"The post with id: {id} was not found"
-                            )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"The post with id: {id} was not found")
 
     return reqested_post
 
@@ -85,14 +83,10 @@ def update_post(id: int, post: schemas.PostCreate, db: Session = Depends(get_db)
     updated_post = query.first()
 
     if updated_post == None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"The post with id: {id} was not found"
-                            )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"The post with id: {id} was not found")
 
     if current_user.id != updated_post.creator_id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                            detail=f"You are NOT authorized to perform the requested action."
-                            )
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"You are NOT authorized to perform the requested action.")
 
     query.update(post.model_dump(), synchronize_session=False)
     db.commit()
@@ -112,14 +106,10 @@ def delete_post(id: int, db: Session = Depends(get_db), current_user: models.Use
     post = query.first()
 
     if post == None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"The post with id: {id} was not found"
-                            )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"The post with id: {id} was not found")
 
     if current_user.id != post.creator_id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                            detail=f"You are NOT authorized to perform the requested action."
-                            )
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"You are NOT authorized to perform the requested action.")
 
     query.delete(synchronize_session=False)
     db.commit()

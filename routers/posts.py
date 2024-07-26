@@ -1,6 +1,7 @@
 from fastapi import status, HTTPException, Depends, APIRouter
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from sqlalchemy import Row, func
+from typing import List, Optional, Tuple
 from app import models, schemas, oauth2
 from app.database import get_db
 
@@ -36,27 +37,32 @@ def create_post(post: schemas.PostCreate, db: Session = Depends(get_db), current
 
 
 ### Get all posts ###
-@router.get('/', response_model=List[schemas.PostResponse])
+# @router.get('/', response_model=List[schemas.PostResponse])
+@router.get('/', response_model=List[Tuple[schemas.PostResponse, int]])
 def get_posts(db: Session = Depends(get_db), limit: int = 10, skip: int = 0, search: Optional[str] = ""):
     # cursor.execute("""
     #                SELECT * FROM posts where id > 90
     #                """)
     # posts = cursor.fetchall()
 
-    posts = db.query(models.Post).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
+    # posts = db.query(models.Post).filter(
+    #    models.Post.title.contains(search)).limit(limit).offset(skip).all()
 
+    posts = db.query(models.Post, func.count(models.Vote.post_id).label('votes')).join(models.Vote, models.Vote.post_id ==
+                                                                                       models.Post.id, isouter=True).group_by(models.Post.id).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
     return posts
 
 
 ### Get a specific post ###
-@router.get('/{id}', response_model=schemas.PostResponse)
+@router.get('/{id}', response_model=Tuple[schemas.PostResponse, int])
 def get_post(id: int, db: Session = Depends(get_db)):
     # cursor.execute("""
     #                SELECT * FROM posts WHERE id = %s
     #                """, [str(id)])
     # post = cursor.fetchone()
 
-    query = db.query(models.Post).filter(models.Post.id == id)
+    query = db.query(models.Post, func.count(models.Vote.post_id).label('votes')).join(models.Vote, models.Vote.post_id ==
+                                                                                       models.Post.id, isouter=True).group_by(models.Post.id).filter(models.Post.id == id)
     reqested_post = query.first()
 
     if not reqested_post:

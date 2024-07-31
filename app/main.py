@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from . import models
+from app import models
 from app.database import engine
 from routers import posts, users, auth, votes
 
@@ -25,10 +25,9 @@ app.add_middleware(
 
 @app.get('/', response_class=HTMLResponse)
 def landing_page(request: Request):
-  
+
     return templates.TemplateResponse(
-      request=request, name='landing_page.html'
-    )
+      request=request, name='landing_page.html')
 
 app.include_router(posts.router)
 app.include_router(users.router)

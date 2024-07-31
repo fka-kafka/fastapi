@@ -1,4 +1,6 @@
 .venv
 .vscode
-__pycache__
+*cache*
+__init__*
 .env
+pyright*

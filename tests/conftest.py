@@ -1,7 +1,7 @@
 from typing import List
 import pytest
 from fastapi.responses import HTMLResponse
-from app import database
+from app.database import get_db
 from app import models
 from app.main import app
 from fastapi.testclient import TestClient
@@ -35,7 +35,7 @@ def client(session):
         finally:
             session.close()
 
-    app.dependency_overrides[database.get_db] = override_get_db
+    app.dependency_overrides[get_db] = override_get_db
     yield TestClient(app)
 
 @pytest.fixture

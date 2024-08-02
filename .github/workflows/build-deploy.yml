@@ -32,7 +32,7 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code 
+      - name: Checkout Code
         uses: actions/checkout@v4
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -51,7 +51,9 @@ jobs:
     env:
       deploy_url: ${{secrets.RENDER_DEPLOY_HOOK_URL}}
     runs-on: ubuntu-latest
+
     steps:
+      - uses: actions/checkout@v4
       - name: Deploy to Render
         run: |
           curl '$deploy_url'

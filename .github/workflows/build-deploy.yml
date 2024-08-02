@@ -3,23 +3,7 @@ name: Build and Deploy to Render
 on: [push]
 
 jobs:
-  Build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Setup Pip
-        run: python -m pip install --upgrade pip
-      - name: Install Project Dependencies
-        run: pip install -r requirements.txt
-
-  Test:
-    needs: [Build]
-
+  Build-Test:
     environment:
       name: Testing
     env:
@@ -48,11 +32,21 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Code 
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Setup Pip
+        run: python -m pip install --upgrade pip
+      - name: Install Project Dependencies
+        run: pip install -r requirements.txt
       - name: Run Tests with PyTest
         run: pytest -sxv --disable-warnings
 
   Deploy:
-    needs: [Test]
+    needs: [Build-Test]
     environment: Deployment
     env:
       deploy_url: ${{secrets.RENDER_DEPLOY_HOOK_URL}}
@@ -61,4 +55,3 @@ jobs:
       - name: Deploy to Render
         run: |
           curl '$deploy_url'
-

@@ -1,6 +1,5 @@
 .venv
 .vscode
 *cache*
-__init__*
 .env
 pyright*

@@ -27,7 +27,7 @@ def create_post(post: schemas.PostCreate, db: Session = Depends(get_db), current
     # connection.commit()
     new_post = models.Post(
         # title=post.title, content=post.content, published=post.published
-        creator_id=current_user.id, **post.model_dump()
+        creator_id=current_user.id, **post.model_dump()     
     )
 
     db.add(new_post)
@@ -40,7 +40,7 @@ def create_post(post: schemas.PostCreate, db: Session = Depends(get_db), current
 ### Get all posts ###
 # @router.get('/', response_model=List[schemas.PostResponse])
 @router.get('/', response_model=List[Tuple[schemas.PostResponse, int]])
-def get_posts(db: Session = Depends(get_db), limit: int = 10, skip: int = 0, search: Optional[str] = ""):
+def get_posts(db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user), limit: int = 10, skip: int = 0, search: Optional[str] = ""):
     # cursor.execute("""
     #                SELECT * FROM posts where id > 90
     #                """)
@@ -49,21 +49,19 @@ def get_posts(db: Session = Depends(get_db), limit: int = 10, skip: int = 0, sea
     # posts = db.query(models.Post).filter(
     #    models.Post.title.contains(search)).limit(limit).offset(skip).all()
 
-    posts = db.query(models.Post, func.count(models.Vote.post_id).label('votes')).join(models.Vote, models.Vote.post_id ==
-                                                                                       models.Post.id, isouter=True).group_by(models.Post.id).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
+    posts = db.query(models.Post, func.count(models.Vote.post_id).label('votes')).join(models.Vote, models.Vote.post_id == models.Post.id, isouter=True).group_by(models.Post.id).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
     return posts
 
 
 ### Get a specific post ###
 @router.get('/{id}', response_model=Tuple[schemas.PostResponse, int])
-def get_post(id: int, db: Session = Depends(get_db)):
+def get_post(id: int, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
     # cursor.execute("""
     #                SELECT * FROM posts WHERE id = %s
     #                """, [str(id)])
     # post = cursor.fetchone()
 
-    query = db.query(models.Post, func.count(models.Vote.post_id).label('votes')).join(models.Vote, models.Vote.post_id ==
-                                                                                       models.Post.id, isouter=True).group_by(models.Post.id).filter(models.Post.id == id)
+    query = db.query(models.Post, func.count(models.Vote.post_id).label('votes')).join(models.Vote, models.Vote.post_id == models.Post.id, isouter=True).group_by(models.Post.id).filter(models.Post.id == id)
     reqested_post = query.first()
 
     if not reqested_post:
@@ -96,7 +94,7 @@ def update_post(id: int, post: schemas.PostCreate, db: Session = Depends(get_db)
 
 
 ### Delete a post ###
-@router.delete('/{id}')
+@router.delete('/{id}', status_code=status.HTTP_204_NO_CONTENT)
 def delete_post(id: int, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
     # cursor.execute("""
     #                DELETE FROM posts WHERE id = %s RETURNING *
